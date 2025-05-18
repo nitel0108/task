@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFL Task Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #bbdefb;
+            display: flex;
+            justify-content: center;
+        }
+        .container, .login-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .login-container {
+            display: block;
+            border: 2px solid #1976d2;
+        }
+        .login-container h1, .container h1 {
+            color: #d32f2f;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .login-container h2 {
+            color: #1976d2;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .login-container p, .container p.tagline {
+            color: #2e7d32;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        .login-container input {
+            padding: 10px;
+            margin: 10px 0;
+            width: 80%;
+            border: 1px solid #90caf9;
+            border-radius: 5px;
+            font-size: 1em;
+            background: #ffffff;
+            color: #333;
+        }
+        .login-container input[type="password"] {
+            background: #ffffff url('https://img.icons8.com/material-outlined/24/000000/lock--v1.png') no-repeat 95% center;
+        }
+        .login-container button {
+            background-color: #0d47a1;
+            color: #fff;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .login-container button:hover {
+            background-color: #1565c0;
+        }
+        .container {
+            display: none;
+            background: #ffffff;
+        }
+        h1 {
+            color: #1976d2;
+        }
+        .task-input, .task-list {
+            margin: 20px 0;
+        }
+        .task-input input, .task-input select, .task-input button {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #90caf9;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .task-input button {
+            background-color: #1976d2;
+            color: white;
+        }
+        .task-input button:hover {
+            background-color: #1565c0;
+        }
+        .task-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .task-list th, .task-list td {
+            border: 1px solid #90caf9;
+            padding: 6px;
+            text-align: left;
+            font-size: 0.85em;
+        }
+        .task-list th {
+            background-color: #1976d2;
+            color: white;
+        }
+        .task-list td button {
+            background-color: #0d47a1;
+            color: #fff;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        .task-list td button:hover {
+            background-color: #1565c0;
+        }
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        .user-dropdown span {
+            color: #1976d2;
+            font-weight: bold;
+        }
+        .user-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #ffffff;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+        }
+        .user-dropdown:hover .user-dropdown-content {
+            display: block;
+        }
+        .user-dropdown-content a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.9em;
+        }
+        .user-dropdown-content a:hover {
+            background-color: #bbdefb;
+        }
+        .user-dropdown-content a.logout {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        button i, .login-container i {
+            margin-right: 5px;
+        }
+        .filter-section {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: nowrap;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .filter-section label {
+            color: #1976d2;
+            font-weight: bold;
+            font-size: 0.8em;
+            margin-right: 2px;
+        }
+        .filter-section input, .filter-section select {
+            padding: 5px;
+            margin: 1px;
+            border-radius: 5px;
+            border: 1px solid #90caf9;
+            font-size: 0.8em;
+            max-width: 100px;
+            box-sizing: border-box;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            text-align: center;
+        }
+        .modal-content input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #90caf9;
+            border-radius: 5px;
+        }
+        .modal-content button {
+            background-color: #1976d2;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .modal-content button:hover {
+            background-color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <h1><i class="fas fa-briefcase"></i> AFL</h1>
+        <h2>Task Tracker</h2>
+        <p class="tagline"><i class="fas fa-check-circle"></i> Stay organized and productive!</p>
+        <div>
+            <input type="text" id="employeeName" placeholder="Employee Name" required>
+        </div>
+        <div>
+            <input type="password" id="password" placeholder="Password" required>
+        </div>
+        <div>
+            <button onclick="login()"><i class="fas fa-sign-in-alt"></i> Login</button>
+            <button onclick="showRegister()"><i class="fas fa-user-plus"></i> Register</button>
+            <button onclick="showForgotPassword()"><i class="fas fa-key"></i> Forgot Password</button>
+        </div>
+    </div>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <h2><i class="fas fa-user-plus"></i> Register</h2>
+            <input type="text" id="regName" placeholder="Employee Name" required>
+            <input type="email" id="regEmail" placeholder="Email" required>
+            <input type="password" id="regPassword" placeholder="Password" required>
+            <button onclick="registerUser()"><i class="fas fa-check"></i> Submit</button>
+            <button onclick="closeModal('registerModal')"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+    </div>
+
+    <div class="modal" id="forgotPasswordModal">
+        <div class="modal-content" id="forgotPasswordContent">
+            <h2><i class="fas fa-key"></i> Forgot Password</h2>
+            <div id="emailStep">
+                <input type="email" id="forgotEmail" placeholder="Enter Email" required>
+                <button onclick="sendOTP()"><i class="fas fa-envelope"></i> Send OTP</button>
+                <button onclick="closeModal('forgotPasswordModal')"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+            <div id="otpStep" style="display: none;">
+                <input type="text" id="otpInput" placeholder="Enter OTP" required>
+                <button onclick="verifyOTP()"><i class="fas fa-check"></i> Verify OTP</button>
+                <button onclick="closeModal('forgotPasswordModal')"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+            <div id="resetStep" style="display: none;">
+                <input type="password" id="newPasswordReset" placeholder="New Password" required>
+                <input type="password" id="confirmPasswordReset" placeholder="Confirm New Password" required>
+                <button onclick="resetPassword()"><i class="fas fa-check"></i> Reset Password</button>
+                <button onclick="closeModal('forgotPasswordModal')"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <h2><i class="fas fa-lock"></i> Change Password</h2>
+            <input type="password" id="oldPassword" placeholder="Old Password" required>
+            <input type="password" id="newPassword" placeholder="New Password" required>
+            <input type="password" id="confirmPassword" placeholder="Confirm New Password" required>
+            <button onclick="changePassword()"><i class="fas fa-check"></i> Submit</button>
+            <button onclick="closeModal('changePasswordModal')"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <h1><i class="fas fa-briefcase"></i> AFL</h1>
+        <h2>Task Tracker</h2>
+        <p class="tagline"><i class="fas fa-check-circle"></i> Stay organized and productive!</p>
+        <p><i class="fas fa-calendar-alt"></i> Current Date: <span id="currentDate"></span></p>
+        <div class="user-dropdown">
+            <span><i class="fas fa-user"></i> Employee: <span id="currentUser"></span></span>
+            <div class="user-dropdown-content">
+                <a href="#" id="userEmail"><i class="fas fa-envelope"></i> Email: </a>
+                <a href="#" onclick="showChangePassword()"><i class="fas fa-lock"></i> Change Password</a>
+                <a href="#" onclick="logout()" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+
+        <div class="task-input">
+            <input type="text" id="taskDescription" placeholder="Enter task description" onkeypress="addTaskOnEnter(event)">
+            <select id="taskPriority">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+            <input type="date" id="taskDueDate">
+            <select id="assignTo">
+                <option value="">Assign to...</option>
+            </select>
+            <button onclick="addTask()"><i class="fas fa-plus"></i> Add Task</button>
+        </div>
+
+        <div class="filter-section">
+            <label><i class="fas fa-filter"></i> Date:</label>
+            <input type="date" id="filterDate" onchange="filterTasksByDate()">
+            <label><i class="fas fa-filter"></i> Status:</label>
+            <select id="taskFilter" onchange="filterTasks()">
+                <option value="All">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+            </select>
+            <label><i class="fas fa-filter"></i> Priority:</label>
+            <select id="priorityFilter" onchange="filterTasks()">
+                <option value="All">All</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+            <label><i class="fas fa-filter"></i> By:</label>
+            <select id="assignedByFilter" onchange="filterTasks()">
+                <option value="All">All</option>
+            </select>
+        </div>
+
+        <div class="task-list">
+            <table id="taskTable">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Priority</th>
+                        <th>Due Date</th>
+                        <th>Assigned By</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="taskBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let users = [];
+        let tasks = [];
+        let currentOTP = null;
+        let resetEmail = null;
+
+        try {
+            users = JSON.parse(localStorage.getItem('users')) || [];
+            tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            console.log('Loaded users:', users);
+            console.log('Loaded tasks:', tasks);
+        } catch (e) {
+            console.error('Error loading localStorage:', e);
+            alert('Failed to load data. Please check browser settings.');
+        }
+
+        function showRegister() {
+            console.log('Attempting to show register modal');
+            const modal = document.getElementById('registerModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.getElementById('regName').focus();
+                console.log('Register modal displayed');
+            } else {
+                console.error('Register modal element not found');
+                alert('Error: Registration modal not found.');
+            }
+        }
+
+        function showForgotPassword() {
+            console.log('Attempting to show forgot password modal');
+            const modal = document.getElementById('forgotPasswordModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.getElementById('forgotEmail').focus();
+                document.getElementById('emailStep').style.display = 'block';
+                document.getElementById('otpStep').style.display = 'none';
+                document.getElementById('resetStep').style.display = 'none';
+                console.log('Forgot password modal displayed');
+            } else {
+                console.error('Forgot password modal element not found');
+                alert('Error: Forgot password modal not found.');
+            }
+        }
+
+        function showChangePassword() {
+            console.log('Attempting to show change password modal');
+            const modal = document.getElementById('changePasswordModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.getElementById('oldPassword').focus();
+                console.log('Change password modal displayed');
+            } else {
+                console.error('Change password modal element not found');
+                alert('Error: Change password modal not found.');
+            }
+        }
+
+        function closeModal(modalId) {
+            console.log(`Closing modal: ${modalId}`);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+                if (modalId === 'registerModal') {
+                    document.getElementById('regName').value = '';
+                    document.getElementById('regEmail').value = '';
+                    document.getElementById('regPassword').value = '';
+                } else if (modalId === 'changePasswordModal') {
+                    document.getElementById('oldPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else if (modalId === 'forgotPasswordModal') {
+                    document.getElementById('forgotEmail').value = '';
+                    document.getElementById('otpInput').value = '';
+                    document.getElementById('newPasswordReset').value = '';
+                    document.getElementById('confirmPasswordReset').value = '';
+                    currentOTP = null;
+                    resetEmail = null;
+                    localStorage.removeItem('tempOTP');
+                }
+                console.log(`${modalId} closed`);
+            } else {
+                console.error(`${modalId} element not found`);
+            }
+        }
+
+        function registerUser() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            console.log('Registering user:', { name, email, password });
+
+            if (!name || !email || !password) {
+                alert('All fields are required!');
+                console.log('Registration failed: Missing fields');
+                return;
+            }
+
+            if (users.find(u => u.name === name)) {
+                alert('User already exists!');
+                console.log('Registration failed: User already exists');
+                return;
+            }
+
+            const newUser = { name, email, password };
+            users.push(newUser);
+            try {
+                localStorage.setItem('users', JSON.stringify(users));
+                console.log('Saved users:', users);
+                alert('Registration successful! Please login.');
+                closeModal('registerModal');
+                populateAssignedByFilter();
+            } catch (e) {
+                console.error('Error saving to localStorage:', e);
+                alert('Failed to save user. Please check browser settings.');
+            }
+        }
+
+        function sendOTP() {
+            const email = document.getElementById('forgotEmail').value.trim();
+            console.log('Sending OTP for:', email);
+
+            if (!email) {
+                alert('Email is required!');
+                console.log('OTP send failed: Missing email');
+                return;
+            }
+
+            const user = users.find(u => u.email === email);
+            if (!user) {
+                alert('Email not found!');
+                console.log('OTP send failed: Email not found');
+                return;
+            }
+
+            currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            resetEmail = email;
+            try {
+                localStorage.setItem('tempOTP', JSON.stringify({ email, otp: currentOTP, timestamp: Date.now() }));
+                console.log(`OTP for ${email}: ${currentOTP}`); // Log OTP to console
+                alert('OTP sent to your email. For testing, check the browser console (F12 > Console). In production, use a backend for secure email delivery.');
+                document.getElementById('emailStep').style.display = 'none';
+                document.getElementById('otpStep').style.display = 'block';
+                document.getElementById('otpInput').focus();
+            } catch (e) {
+                console.error('Error saving OTP to localStorage:', e);
+                alert('Failed to generate OTP. Please check browser settings.');
+            }
+        }
+
+        function verifyOTP() {
+            const otpInput = document.getElementById('otpInput').value.trim();
+            console.log('Verifying OTP:', otpInput);
+
+            if (!otpInput) {
+                alert('OTP is required!');
+                console.log('OTP verification failed: Missing OTP');
+                return;
+            }
+
+            try {
+                const tempOTP = JSON.parse(localStorage.getItem('tempOTP'));
+                if (tempOTP && tempOTP.otp === otpInput && tempOTP.email === resetEmail) {
+                    console.log('OTP verified successfully');
+                    document.getElementById('otpStep').style.display = 'none';
+                    document.getElementById('resetStep').style.display = 'block';
+                    document.getElementById('newPasswordReset').focus();
+                } else {
+                    alert('Invalid OTP!');
+                    console.log('OTP verification failed: Invalid OTP');
+                }
+            } catch (e) {
+                console.error('Error verifying OTP:', e);
+                alert('Failed to verify OTP. Please try again.');
+            }
+        }
+
+        function resetPassword() {
+            const newPassword = document.getElementById('newPasswordReset').value.trim();
+            const confirmPassword = document.getElementById('confirmPasswordReset').value.trim();
+            console.log('Resetting password for:', resetEmail);
+
+            if (!newPassword || !confirmPassword) {
+                alert('All fields are required!');
+                console.log('Password reset failed: Missing fields');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('Passwords do not match!');
+                console.log('Password reset failed: Passwords do not match');
+                return;
+            }
+
+            const user = users.find(u => u.email === resetEmail);
+            if (user) {
+                user.password = newPassword;
+                try {
+                    localStorage.setItem('users', JSON.stringify(users));
+                    localStorage.removeItem('tempOTP');
+                    console.log('Password reset for:', user);
+                    alert('Password reset successfully! Please login.');
+                    closeModal('forgotPasswordModal');
+                } catch (e) {
+                    console.error('Error saving to localStorage:', e);
+                    alert('Failed to reset password. Please check browser settings.');
+                }
+            } else {
+                console.error('User not found:', resetEmail);
+                alert('Error: User not found.');
+            }
+        }
+
+        function changePassword() {
+            const oldPassword = document.getElementById('oldPassword').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            console.log('Changing password for:', currentUser.name);
+
+            if (!oldPassword || !newPassword || !confirmPassword) {
+                alert('All fields are required!');
+                console.log('Password change failed: Missing fields');
+                return;
+            }
+
+            if (oldPassword !== currentUser.password) {
+                alert('Old password is incorrect!');
+                console.log('Password change failed: Incorrect old password');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('New password and confirm password do not match!');
+                console.log('Password change failed: Passwords do not match');
+                return;
+            }
+
+            const user = users.find(u => u.name === currentUser.name);
+            if (user) {
+                user.password = newPassword;
+                try {
+                    localStorage.setItem('users', JSON.stringify(users));
+                    console.log('Password changed for:', user);
+                    alert('Password changed successfully! Please login again.');
+                    logout();
+                } catch (e) {
+                    console.error('Error saving to localStorage:', e);
+                    alert('Failed to save password. Please check browser settings.');
+                }
+            } else {
+                console.error('User not found:', currentUser.name);
+                alert('Error: User not found.');
+            }
+        }
+
+        function login() {
+            const name = document.getElementById('employeeName').value.trim();
+            const password = document.getElementById('password').value.trim();
+            console.log('Attempting login:', { name, password });
+
+            const user = users.find(u => u.name === name && u.password === password);
+            if (user) {
+                currentUser = user;
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
+                document.getElementById('currentUser').textContent = user.name;
+                document.getElementById('userEmail').textContent = `Email: ${user.email}`;
+                console.log('Login successful:', user);
+                populateAssignTo();
+                populateAssignedByFilter();
+                displayTasks();
+                updateDate();
+            } else {
+                alert('Invalid credentials!');
+                console.log('Login failed: Invalid credentials');
+            }
+        }
+
+        function logout() {
+            console.log('Logging out:', currentUser);
+            currentUser = null;
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('employeeName').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function updateDate() {
+            const options = { timeZone: 'Asia/Kolkata', year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date().toLocaleDateString('en-IN', options);
+            document.getElementById('currentDate').textContent = date;
+            console.log('Updated date:', date);
+        }
+
+        function populateAssignTo() {
+            const assignTo = document.getElementById('assignTo');
+            assignTo.innerHTML = '<option value="">Assign to...</option>';
+            users.forEach(user => {
+                if (user.name !== currentUser.name) {
+                    const option = document.createElement('option');
+                    option.value = user.name;
+                    option.textContent = user.name;
+                    assignTo.appendChild(option);
+                }
+            });
+            console.log('Populated assign-to dropdown');
+        }
+
+        function populateAssignedByFilter() {
+            const assignedByFilter = document.getElementById('assignedByFilter');
+            assignedByFilter.innerHTML = '<option value="All">All</option>';
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.name;
+                option.textContent = user.name;
+                assignedByFilter.appendChild(option);
+            });
+            console.log('Populated assigned-by filter');
+        }
+
+        function addTaskOnEnter(event) {
+            if (event.key === 'Enter') {
+                addTask();
+            }
+        }
+
+        function addTask() {
+            const description = document.getElementById('taskDescription').value.trim();
+            const priority = document.getElementById('taskPriority').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+            const assignTo = document.getElementById('assignTo').value || currentUser.name;
+            console.log('Adding task:', { description, priority, dueDate, assignTo });
+
+            if (description && dueDate) {
+                tasks.push({
+                    id: Date.now(),
+                    description,
+                    priority,
+                    dueDate,
+                    assignedBy: currentUser.name,
+                    assignedTo: assignTo,
+                    status: 'Pending'
+                });
+                try {
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                    console.log('Saved tasks:', tasks);
+                    document.getElementById('taskDescription').value = '';
+                    document.getElementById('taskDueDate').value = '';
+                    document.getElementById('assignTo').value = '';
+                    displayTasks();
+                } catch (e) {
+                    console.error('Error saving tasks:', e);
+                    alert('Failed to save task. Please check browser settings.');
+                }
+            } else {
+                alert('Please enter task description and due date!');
+            }
+        }
+
+        function completeTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.status = 'Completed';
+                try {
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                    console.log('Task completed:', task);
+                    displayTasks();
+                } catch (e) {
+                    console.error('Error saving tasks:', e);
+                    alert('Failed to update task. Please check browser settings.');
+                }
+            }
+        }
+
+        function filterTasksByDate() {
+            console.log('Filtering tasks by date');
+            displayTasks();
+        }
+
+        function filterTasks() {
+            console.log('Filtering tasks');
+            displayTasks();
+        }
+
+        function displayTasks() {
+            const taskBody = document.getElementById('taskBody');
+            const filter = document.getElementById('taskFilter').value;
+            const filterDate = document.getElementById('filterDate').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            const assignedByFilter = document.getElementById('assignedByFilter').value;
+            taskBody.innerHTML = '';
+            tasks.forEach(task => {
+                if (task.assignedBy === currentUser.name || task.assignedTo === currentUser.name) {
+                    if (filter === 'All' || task.status === filter) {
+                        if (!filterDate || task.dueDate === filterDate) {
+                            if (priorityFilter === 'All' || task.priority === priorityFilter) {
+                                if (assignedByFilter === 'All' || task.assignedBy === assignedByFilter) {
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = `
+                                        <td>${task.description}</td>
+                                        <td>${task.priority}</td>
+                                        <td>${task.dueDate}</td>
+                                        <td>${task.assignedBy}</td>
+                                        <td>${task.status}</td>
+                                        <td>${task.status === 'Pending' ? `<button onclick="completeTask(${task.id})"><i class="fas fa-check"></i> Complete</button>` : ''}</td>
+                                    `;
+                                    taskBody.appendChild(row);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            console.log('Displayed tasks with filters:', { filter, filterDate, priorityFilter, assignedByFilter });
+        }
+
+        populateAssignedByFilter();
+    </script>
+</body>
+</html>
